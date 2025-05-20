@@ -9,18 +9,18 @@ import (
 )
 
 type LoggerSync struct {
-	tag              string
-	enDebug          bool
-	infoStyle        []int8
-	warnStyle        []int8
-	errorStyle       []int8
-	debugStyle       []int8
-	panicStyle       []int8
-	fatalStyle       []int8
-	writeFilesEnable bool
-	gateName         string
-	file             *os.File
-	filesName        string
+	tag             string
+	enDebug         bool
+	infoStyle       []int8
+	warnStyle       []int8
+	errorStyle      []int8
+	debugStyle      []int8
+	panicStyle      []int8
+	fatalStyle      []int8
+	writeFileEnable bool
+	gateName        string
+	file            *os.File
+	fileName        string
 }
 
 // New creates a new Logger instance
@@ -45,21 +45,21 @@ func NewSync(tag string, debugMode bool, gateName string) *LoggerSync {
 
 	// Create a new LoggerSync instance
 	logger := &LoggerSync{
-		tag:              tag,
-		enDebug:          debugMode,
-		writeFilesEnable: false,
-		gateName:         gateName,
-		filesName:        fileNameInit,
-		file:             fileInit,
+		tag:             tag,
+		enDebug:         debugMode,
+		writeFileEnable: false,
+		gateName:        gateName,
+		fileName:        fileNameInit,
+		file:            fileInit,
 	}
 	log.SetOutput(os.Stdout)
 	log.SetFlags(0) // Disable the default timestamp and log prefix
 	return logger
 }
 
-func (l *LoggerSync) ChangeFileRoutine() {
-	HOUR := 00
-	MINUTE := 00
+func (l *LoggerSync) ChangeFileRoutine(hour int, minute int) {
+	HOUR := hour
+	MINUTE := minute
 	go func() {
 		for range time.Tick(1 * time.Minute) {
 			hours, minutes, _ := time.Now().Clock()
@@ -68,8 +68,8 @@ func (l *LoggerSync) ChangeFileRoutine() {
 				l.file.Close()
 
 				// Create new file object with the append mode
-				l.filesName = fileNameGenerator(l.gateName)
-				l.file = createAndAppendObject(l.filesName)
+				l.fileName = fileNameGenerator(l.gateName)
+				l.file = createAndAppendObject(l.fileName)
 			}
 		}
 	}()
@@ -77,13 +77,13 @@ func (l *LoggerSync) ChangeFileRoutine() {
 }
 
 func (l *LoggerSync) writeLog(msg string) {
-	if l.writeFilesEnable {
+	if l.writeFileEnable {
 		l.file.WriteString(msg + "\n")
 	}
 }
 
 func (l *LoggerSync) SetWriteFilesEnable(enable bool) {
-	l.writeFilesEnable = enable
+	l.writeFileEnable = enable
 }
 
 func (l *LoggerSync) applyStyle(str string, styles ...int8) string {

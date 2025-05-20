@@ -9,20 +9,20 @@ import (
 )
 
 type LoggerAsync struct {
-	ch               chan string
-	chRaw            chan string
-	tag              string
-	enDebug          bool
-	infoStyle        []int8
-	warnStyle        []int8
-	errorStyle       []int8
-	debugStyle       []int8
-	panicStyle       []int8
-	fatalStyle       []int8
-	writeFilesEnable bool
-	gateName         string
-	file             *os.File
-	filesName        string
+	ch              chan string
+	chRaw           chan string
+	tag             string
+	enDebug         bool
+	infoStyle       []int8
+	warnStyle       []int8
+	errorStyle      []int8
+	debugStyle      []int8
+	panicStyle      []int8
+	fatalStyle      []int8
+	writeFileEnable bool
+	gateName        string
+	file            *os.File
+	fileName        string
 }
 
 // New creates a new Logger instance
@@ -47,14 +47,14 @@ func NewAsync(tag string, bufferSize int, debugMode bool, gateName string) *Logg
 	fileInit := createAndAppendObject(fileNameInit)
 
 	logger := &LoggerAsync{
-		ch:               make(chan string, bufferSize), // Buffered channel
-		chRaw:            make(chan string, bufferSize), // Buffered channel
-		tag:              tag,
-		enDebug:          debugMode,
-		writeFilesEnable: false,
-		gateName:         gateName,
-		filesName:        fileNameInit,
-		file:             fileInit,
+		ch:              make(chan string, bufferSize), // Buffered channel
+		chRaw:           make(chan string, bufferSize), // Buffered channel
+		tag:             tag,
+		enDebug:         debugMode,
+		writeFileEnable: false,
+		gateName:        gateName,
+		fileName:        fileNameInit,
+		file:            fileInit,
 	}
 	logger.init()
 	return logger
@@ -77,10 +77,9 @@ func (l *LoggerAsync) init() {
 	}()
 }
 
-func (l *LoggerAsync) ChangeFileRoutine() {
-	HOUR := 00
-	MINUTE := 00
-
+func (l *LoggerAsync) ChangeFileRoutine(hour int, minute int) {
+	HOUR := hour
+	MINUTE := minute
 	go func() {
 		for range time.Tick(1 * time.Minute) {
 			hours, minutes, _ := time.Now().Clock()
@@ -89,8 +88,8 @@ func (l *LoggerAsync) ChangeFileRoutine() {
 				l.file.Close()
 
 				// Create new file object with the append mode
-				l.filesName = fileNameGenerator(l.gateName)
-				l.file = createAndAppendObject(l.filesName)
+				l.fileName = fileNameGenerator(l.gateName)
+				l.file = createAndAppendObject(l.fileName)
 			}
 		}
 	}()
@@ -98,13 +97,13 @@ func (l *LoggerAsync) ChangeFileRoutine() {
 }
 
 func (l *LoggerAsync) writeLog(msg string) {
-	if l.writeFilesEnable {
+	if l.writeFileEnable {
 		l.file.WriteString(msg + "\n")
 	}
 }
 
 func (l *LoggerAsync) SetWriteFilesEnable(enable bool) {
-	l.writeFilesEnable = enable
+	l.writeFileEnable = enable
 }
 
 func (l *LoggerAsync) applyStyle(str string, styles ...int8) string {

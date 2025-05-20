@@ -14,7 +14,7 @@ func main() {
 func SyncImplementation() {
 	logger := logger.NewSync("TEST", true, "ABA11")
 	logger.SetWriteFilesEnable(true)
-	logger.ChangeFileRoutine()
+	logger.ChangeFileRoutine(00, 00)
 	logger.SetDefaultStyle()
 	logger.Debug("Sync logger started")
 	logMessage := "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum. Logging test for long message.12345"
@@ -39,7 +39,7 @@ func SyncImplementation() {
 func AsyncImplementation() {
 	logger := logger.NewAsync("TEST", 10, true, "ABA11")
 	logger.SetWriteFilesEnable(true)
-	logger.ChangeFileRoutine()
+	logger.ChangeFileRoutine(00, 00)
 	logger.SetDefaultStyle()
 	logger.Debug("Async logger started")
 	logMessage := "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum. Logging test for long message.12345"

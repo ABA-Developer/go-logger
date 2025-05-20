@@ -26,8 +26,8 @@ func createAndAppendObject(filesName string) *os.File {
 	return file
 }
 
-func fileNameGenerator(gateName string) string {
+func fileNameGenerator(objectName string) string {
 	// Generate file name based on gateName
-	today := time.Now().Format("2006-01-02 15:04")
-	return fmt.Sprintf("%s:%s.txt", today, gateName)
+	today := time.Now().Format("2006-01-02")
+	return fmt.Sprintf("%s:%s.txt", today, objectName)
 }
