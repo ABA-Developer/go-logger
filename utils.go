@@ -4,20 +4,25 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"path/filepath"
 	"time"
 )
 
-func createAndAppendObject(filesName string, path string) *os.File {
-	// Create New File log and close it immediately
-	file, err := os.Create(path + "/" + filesName)
-	if err != nil {
-		log.Println("Error creating file:", err)
-		return nil
+func createAndAppendObject(fileName string, path string) *os.File {
+	// Check if file exists
+	fullPath := filepath.Join(path, fileName)
+	if _, err := os.Stat(fullPath); os.IsNotExist(err) {
+		// File does not exist, create New File log and close it immediately
+		file, err := os.Create(fullPath)
+		if err != nil {
+			log.Println("Error creating file:", err)
+			return nil
+		}
+		file.Close()
 	}
-	file.Close()
 
 	// Open the created file in append mode and save to struct
-	file, err = os.OpenFile(path+"/"+filesName, os.O_APPEND|os.O_WRONLY, 0644)
+	file, err := os.OpenFile(path+"/"+fileName, os.O_APPEND|os.O_WRONLY, 0644)
 	if err != nil {
 		log.Println("Error opening file:", err)
 		return nil
