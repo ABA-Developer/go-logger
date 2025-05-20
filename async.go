@@ -78,15 +78,13 @@ func (l *LoggerAsync) init() {
 }
 
 func (l *LoggerAsync) ChangeFileRoutine() {
-	// HOUR := 00
-	// MINUTE := 00
-	SECOND := 00
+	HOUR := 00
+	MINUTE := 00
+
 	go func() {
-		for range time.Tick(1 * time.Second) {
-			_, _, seconds := time.Now().Clock()
-			if seconds == SECOND {
-				fmt.Println("ChangeFileRoutine executuion")
-				// if hours == HOUR && minutes == MINUTE {
+		for range time.Tick(1 * time.Minute) {
+			hours, minutes, _ := time.Now().Clock()
+			if hours == HOUR && minutes == MINUTE {
 				// Close first previous object file
 				l.file.Close()
 
@@ -101,12 +99,7 @@ func (l *LoggerAsync) ChangeFileRoutine() {
 
 func (l *LoggerAsync) writeLog(msg string) {
 	if l.writeFilesEnable {
-		start := time.Now()
-
 		l.file.WriteString(msg + "\n")
-
-		duration := time.Since(start)
-		fmt.Printf("Execution took %s\n", duration)
 	}
 }
 
@@ -135,8 +128,12 @@ func (l *LoggerAsync) getTime() string {
 
 func (l *LoggerAsync) Flush() {
 	close(l.ch)
+	close(l.chRaw)
 	for logMsg := range l.ch {
 		log.Print(logMsg)
+	}
+	for logMsgRaw := range l.chRaw {
+		log.Print(logMsgRaw)
 	}
 }
 

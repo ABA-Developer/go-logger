@@ -58,15 +58,12 @@ func NewSync(tag string, debugMode bool, gateName string) *LoggerSync {
 }
 
 func (l *LoggerSync) ChangeFileRoutine() {
-	// HOUR := 00
-	// MINUTE := 00
-	SECOND := 00
+	HOUR := 00
+	MINUTE := 00
 	go func() {
-		for range time.Tick(1 * time.Second) {
-			_, _, seconds := time.Now().Clock()
-			if seconds == SECOND {
-				fmt.Println("ChangeFileRoutine executuion")
-				// if hours == HOUR && minutes == MINUTE {
+		for range time.Tick(1 * time.Minute) {
+			hours, minutes, _ := time.Now().Clock()
+			if hours == HOUR && minutes == MINUTE {
 				// Close first previous object file
 				l.file.Close()
 
@@ -81,12 +78,7 @@ func (l *LoggerSync) ChangeFileRoutine() {
 
 func (l *LoggerSync) writeLog(msg string) {
 	if l.writeFilesEnable {
-		start := time.Now()
-
 		l.file.WriteString(msg + "\n")
-
-		duration := time.Since(start)
-		fmt.Printf("Execution took %s\n", duration)
 	}
 }
 

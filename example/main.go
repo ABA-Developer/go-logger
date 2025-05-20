@@ -29,7 +29,7 @@ func SyncImplementation() {
 		}
 		i++
 		time.Sleep(100 * time.Millisecond)
-		if i > 10000 {
+		if i > 1000 {
 			break
 		}
 	}
@@ -54,7 +54,7 @@ func AsyncImplementation() {
 		}
 		i++
 		time.Sleep(100 * time.Millisecond)
-		if i > 10000 {
+		if i > 1000 {
 			break
 		}
 	}
