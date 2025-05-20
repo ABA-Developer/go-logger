@@ -7,12 +7,13 @@ import (
 )
 
 func main() {
-	SyncImplementation()
+	// SyncImplementation()
 	AsyncImplementation()
 }
 
 func SyncImplementation() {
 	logger := logger.NewSync("TEST", true, "ABA11")
+	// logger.SetPath("log_files_test")
 	logger.SetWriteFilesEnable(true)
 	logger.ChangeFileRoutine(00, 00)
 	logger.SetDefaultStyle()
@@ -38,6 +39,7 @@ func SyncImplementation() {
 
 func AsyncImplementation() {
 	logger := logger.NewAsync("TEST", 10, true, "ABA11")
+	// logger.SetPath("log_files_test")
 	logger.SetWriteFilesEnable(true)
 	logger.ChangeFileRoutine(00, 00)
 	logger.SetDefaultStyle()

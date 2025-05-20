@@ -23,6 +23,7 @@ type LoggerAsync struct {
 	gateName        string
 	file            *os.File
 	fileName        string
+	path            string
 }
 
 // New creates a new Logger instance
@@ -43,8 +44,9 @@ func NewAsync(tag string, bufferSize int, debugMode bool, gateName string) *Logg
 	tag = "[" + tag + "]"
 
 	// Initial file object
+	pathInit := newFolderPath("log_files")
 	fileNameInit := fileNameGenerator(gateName)
-	fileInit := createAndAppendObject(fileNameInit)
+	fileInit := createAndAppendObject(fileNameInit, pathInit)
 
 	logger := &LoggerAsync{
 		ch:              make(chan string, bufferSize), // Buffered channel
@@ -55,6 +57,7 @@ func NewAsync(tag string, bufferSize int, debugMode bool, gateName string) *Logg
 		gateName:        gateName,
 		fileName:        fileNameInit,
 		file:            fileInit,
+		path:            pathInit,
 	}
 	logger.init()
 	return logger
@@ -89,7 +92,7 @@ func (l *LoggerAsync) ChangeFileRoutine(hour int, minute int) {
 
 				// Create new file object with the append mode
 				l.fileName = fileNameGenerator(l.gateName)
-				l.file = createAndAppendObject(l.fileName)
+				l.file = createAndAppendObject(l.fileName, l.path)
 			}
 		}
 	}()
@@ -104,6 +107,18 @@ func (l *LoggerAsync) writeLog(msg string) {
 
 func (l *LoggerAsync) SetWriteFilesEnable(enable bool) {
 	l.writeFileEnable = enable
+}
+
+func (l *LoggerAsync) SetPath(path string) {
+	l.file.Close()
+
+	// New path with folder creation
+	l.path = path
+	newFolderPath(path)
+
+	// Initial file object
+	l.fileName = fileNameGenerator(l.gateName)
+	l.file = createAndAppendObject(l.fileName, l.path)
 }
 
 func (l *LoggerAsync) applyStyle(str string, styles ...int8) string {

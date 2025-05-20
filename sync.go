@@ -21,6 +21,7 @@ type LoggerSync struct {
 	gateName        string
 	file            *os.File
 	fileName        string
+	path            string
 }
 
 // New creates a new Logger instance
@@ -40,8 +41,9 @@ func NewSync(tag string, debugMode bool, gateName string) *LoggerSync {
 	tag = "[" + tag + "]"
 
 	// Initial file object
+	pathInit := newFolderPath("log_files")
 	fileNameInit := fileNameGenerator(gateName)
-	fileInit := createAndAppendObject(fileNameInit)
+	fileInit := createAndAppendObject(fileNameInit, pathInit)
 
 	// Create a new LoggerSync instance
 	logger := &LoggerSync{
@@ -51,6 +53,7 @@ func NewSync(tag string, debugMode bool, gateName string) *LoggerSync {
 		gateName:        gateName,
 		fileName:        fileNameInit,
 		file:            fileInit,
+		path:            pathInit,
 	}
 	log.SetOutput(os.Stdout)
 	log.SetFlags(0) // Disable the default timestamp and log prefix
@@ -69,7 +72,7 @@ func (l *LoggerSync) ChangeFileRoutine(hour int, minute int) {
 
 				// Create new file object with the append mode
 				l.fileName = fileNameGenerator(l.gateName)
-				l.file = createAndAppendObject(l.fileName)
+				l.file = createAndAppendObject(l.fileName, l.path)
 			}
 		}
 	}()
@@ -84,6 +87,18 @@ func (l *LoggerSync) writeLog(msg string) {
 
 func (l *LoggerSync) SetWriteFilesEnable(enable bool) {
 	l.writeFileEnable = enable
+}
+
+func (l *LoggerSync) SetPath(path string) {
+	l.file.Close()
+
+	// New path with folder creation
+	l.path = path
+	newFolderPath(path)
+
+	// Initial file object
+	l.fileName = fileNameGenerator(l.gateName)
+	l.file = createAndAppendObject(l.fileName, l.path)
 }
 
 func (l *LoggerSync) applyStyle(str string, styles ...int8) string {
