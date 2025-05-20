@@ -9,15 +9,20 @@ import (
 )
 
 type LoggerAsync struct {
-	ch         chan string
-	tag        string
-	enDebug    bool
-	infoStyle  []int8
-	warnStyle  []int8
-	errorStyle []int8
-	debugStyle []int8
-	panicStyle []int8
-	fatalStyle []int8
+	ch               chan string
+	chRaw            chan string
+	tag              string
+	enDebug          bool
+	infoStyle        []int8
+	warnStyle        []int8
+	errorStyle       []int8
+	debugStyle       []int8
+	panicStyle       []int8
+	fatalStyle       []int8
+	writeFilesEnable bool
+	gateName         string
+	file             *os.File
+	filesName        string
 }
 
 // New creates a new Logger instance
@@ -30,17 +35,26 @@ type LoggerAsync struct {
 // logger.SetDefaultStyle()
 // logger.Info("GPIO handler started")
 // log format: [INFO] [TIME] [GPIO]: GPIO handler started
-func NewAsync(tag string, bufferSize int, debugMode bool) *LoggerAsync {
+func NewAsync(tag string, bufferSize int, debugMode bool, gateName string) *LoggerAsync {
 	lenTag := len(tag)
 	if lenTag < 7 {
 		tag += strings.Repeat(" ", 7-lenTag)
 	}
 	tag = "[" + tag + "]"
 
+	// Initial file object
+	fileNameInit := fileNameGenerator(gateName)
+	fileInit := createAndAppendObject(fileNameInit)
+
 	logger := &LoggerAsync{
-		ch:      make(chan string, bufferSize), // Buffered channel
-		tag:     tag,
-		enDebug: debugMode,
+		ch:               make(chan string, bufferSize), // Buffered channel
+		chRaw:            make(chan string, bufferSize), // Buffered channel
+		tag:              tag,
+		enDebug:          debugMode,
+		writeFilesEnable: false,
+		gateName:         gateName,
+		filesName:        fileNameInit,
+		file:             fileInit,
 	}
 	logger.init()
 	return logger
@@ -55,6 +69,49 @@ func (l *LoggerAsync) init() {
 			log.Print(logMsg)
 		}
 	}()
+
+	go func() {
+		for logMsgRaw := range l.chRaw {
+			l.writeLog(logMsgRaw)
+		}
+	}()
+}
+
+func (l *LoggerAsync) ChangeFileRoutine() {
+	// HOUR := 00
+	// MINUTE := 00
+	SECOND := 00
+	go func() {
+		for range time.Tick(1 * time.Second) {
+			_, _, seconds := time.Now().Clock()
+			if seconds == SECOND {
+				fmt.Println("ChangeFileRoutine executuion")
+				// if hours == HOUR && minutes == MINUTE {
+				// Close first previous object file
+				l.file.Close()
+
+				// Create new file object with the append mode
+				l.filesName = fileNameGenerator(l.gateName)
+				l.file = createAndAppendObject(l.filesName)
+			}
+		}
+	}()
+
+}
+
+func (l *LoggerAsync) writeLog(msg string) {
+	if l.writeFilesEnable {
+		start := time.Now()
+
+		l.file.WriteString(msg + "\n")
+
+		duration := time.Since(start)
+		fmt.Printf("Execution took %s\n", duration)
+	}
+}
+
+func (l *LoggerAsync) SetWriteFilesEnable(enable bool) {
+	l.writeFilesEnable = enable
 }
 
 func (l *LoggerAsync) applyStyle(str string, styles ...int8) string {
@@ -133,36 +190,42 @@ func (l *LoggerAsync) SetDefaultStyle() {
 
 func (l *LoggerAsync) Info(a ...any) {
 	msg := l.getTime() + infoKey + l.tag + ": " + fmt.Sprint(a...)
+	l.chRaw <- msg
 	msg = l.applyStyle(msg, l.infoStyle...)
 	l.ch <- msg
 }
 
 func (l *LoggerAsync) Infof(format string, a ...any) {
 	msg := l.getTime() + infoKey + l.tag + ": " + fmt.Sprintf(format, a...)
+	l.chRaw <- msg
 	msg = l.applyStyle(msg, l.infoStyle...)
 	l.ch <- msg
 }
 
 func (l *LoggerAsync) Warn(a ...any) {
 	msg := l.getTime() + warnKey + l.tag + ": " + fmt.Sprint(a...)
+	l.chRaw <- msg
 	msg = l.applyStyle(msg, l.warnStyle...)
 	l.ch <- msg
 }
 
 func (l *LoggerAsync) Warnf(format string, a ...any) {
 	msg := l.getTime() + warnKey + l.tag + ": " + fmt.Sprintf(format, a...)
+	l.chRaw <- msg
 	msg = l.applyStyle(msg, l.warnStyle...)
 	l.ch <- msg
 }
 
 func (l *LoggerAsync) Error(a ...any) {
 	msg := l.getTime() + errorKey + l.tag + ": " + fmt.Sprint(a...)
+	l.chRaw <- msg
 	msg = l.applyStyle(msg, l.errorStyle...)
 	l.ch <- msg
 }
 
 func (l *LoggerAsync) Errorf(format string, a ...any) {
 	msg := l.getTime() + errorKey + l.tag + ": " + fmt.Sprintf(format, a...)
+	l.chRaw <- msg
 	msg = l.applyStyle(msg, l.errorStyle...)
 	l.ch <- msg
 }
@@ -170,6 +233,7 @@ func (l *LoggerAsync) Errorf(format string, a ...any) {
 func (l *LoggerAsync) Debug(a ...any) {
 	if l.enDebug {
 		msg := l.getTime() + debugKey + l.tag + ": " + fmt.Sprint(a...)
+		l.chRaw <- msg
 		msg = l.applyStyle(msg, l.debugStyle...)
 		l.ch <- msg
 	}
@@ -178,6 +242,7 @@ func (l *LoggerAsync) Debug(a ...any) {
 func (l *LoggerAsync) Debugf(format string, a ...any) {
 	if l.enDebug {
 		msg := l.getTime() + debugKey + l.tag + ": " + fmt.Sprintf(format, a...)
+		l.chRaw <- msg
 		msg = l.applyStyle(msg, l.debugStyle...)
 		l.ch <- msg
 	}
@@ -185,24 +250,28 @@ func (l *LoggerAsync) Debugf(format string, a ...any) {
 
 func (l *LoggerAsync) Panic(a ...any) {
 	msg := l.getTime() + panicKey + l.tag + ": " + fmt.Sprint(a...)
+	l.chRaw <- msg
 	msg = l.applyStyle(msg, l.panicStyle...)
-	log.Panicln(msg)
+	l.ch <- msg
 }
 
 func (l *LoggerAsync) Panicf(format string, a ...any) {
 	msg := l.getTime() + panicKey + l.tag + ": " + fmt.Sprintf(format, a...)
+	l.chRaw <- msg
 	msg = l.applyStyle(msg, l.panicStyle...)
-	log.Panicln(msg)
+	l.ch <- msg
 }
 
 func (l *LoggerAsync) Fatal(a ...any) {
 	msg := l.getTime() + fatalKey + l.tag + ": " + fmt.Sprint(a...)
+	l.chRaw <- msg
 	msg = l.applyStyle(msg, l.fatalStyle...)
-	log.Fatalln(msg)
+	l.ch <- msg
 }
 
 func (l *LoggerAsync) Fatalf(format string, a ...any) {
 	msg := l.getTime() + fatalKey + l.tag + ": " + fmt.Sprintf(format, a...)
+	l.chRaw <- msg
 	msg = l.applyStyle(msg, l.fatalStyle...)
-	log.Fatalln(msg)
+	l.ch <- msg
 }
