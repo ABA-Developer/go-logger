@@ -23,7 +23,7 @@ func CaptureLogOutput(f func()) string {
 }
 
 func TestLoggerAsync_Info_Color(t *testing.T) {
-	logger := NewAsync("TEST", 10, false, "ABA11")
+	logger := NewAsync("TEST", 10, false)
 	logger.SetInfoStyle(StyleFgGreen) // Expect green ANSI color
 
 	output := CaptureLogOutput(func() {
@@ -40,7 +40,7 @@ func TestLoggerAsync_Info_Color(t *testing.T) {
 }
 
 func TestLoggerAsync_Infof_Color(t *testing.T) {
-	logger := NewAsync("TEST", 10, false, "ABA11")
+	logger := NewAsync("TEST", 10, false)
 	logger.SetInfoStyle(StyleFgGreen)
 
 	output := CaptureLogOutput(func() {
@@ -57,7 +57,7 @@ func TestLoggerAsync_Infof_Color(t *testing.T) {
 }
 
 func TestLoggerAsync_Warn_Color(t *testing.T) {
-	logger := NewAsync("TEST", 10, false, "ABA11")
+	logger := NewAsync("TEST", 10, false)
 	logger.SetWarnStyle(StyleFgYellow)
 
 	output := CaptureLogOutput(func() {
@@ -70,7 +70,7 @@ func TestLoggerAsync_Warn_Color(t *testing.T) {
 }
 
 func TestLoggerAsync_Warnf_Color(t *testing.T) {
-	logger := NewAsync("TEST", 10, false, "ABA11")
+	logger := NewAsync("TEST", 10, false)
 	logger.SetWarnStyle(StyleFgYellow)
 
 	output := CaptureLogOutput(func() {
@@ -87,7 +87,7 @@ func TestLoggerAsync_Warnf_Color(t *testing.T) {
 }
 
 func TestLoggerAsync_Error_Color(t *testing.T) {
-	logger := NewAsync("TEST", 10, false, "ABA11")
+	logger := NewAsync("TEST", 10, false)
 	logger.SetErrorStyle(StyleFgRed)
 
 	output := CaptureLogOutput(func() {
@@ -100,7 +100,7 @@ func TestLoggerAsync_Error_Color(t *testing.T) {
 }
 
 func TestLoggerAsync_Errorf_Color(t *testing.T) {
-	logger := NewAsync("TEST", 10, false, "ABA11")
+	logger := NewAsync("TEST", 10, false)
 	logger.SetErrorStyle(StyleFgRed)
 
 	output := CaptureLogOutput(func() {
@@ -117,7 +117,7 @@ func TestLoggerAsync_Errorf_Color(t *testing.T) {
 }
 
 func TestLoggerAsync_Debug_Color(t *testing.T) {
-	logger := NewAsync("TEST", 10, true, "ABA11") // Debug mode enabled
+	logger := NewAsync("TEST", 10, true) // Debug mode enabled
 	logger.SetDebugStyle(StyleFgCyan)
 
 	output := CaptureLogOutput(func() {
@@ -134,7 +134,7 @@ func TestLoggerAsync_Debug_Color(t *testing.T) {
 }
 
 func TestLoggerAsync_Debugf_Color(t *testing.T) {
-	logger := NewAsync("TEST", 10, true, "ABA11") // Debug mode enabled
+	logger := NewAsync("TEST", 10, true) // Debug mode enabled
 	logger.SetDebugStyle(StyleFgCyan)
 
 	output := CaptureLogOutput(func() {

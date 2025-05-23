@@ -6,7 +6,7 @@ import (
 )
 
 func TestLoggerSync_Info_Color(t *testing.T) {
-	logger := NewSync("TEST", false, "ABA11")
+	logger := NewSync("TEST", false)
 	logger.SetInfoStyle(StyleFgGreen) // Expect green ANSI color
 
 	output := CaptureLogOutput(func() {
@@ -23,7 +23,7 @@ func TestLoggerSync_Info_Color(t *testing.T) {
 }
 
 func TestLoggerSync_Infof_Color(t *testing.T) {
-	logger := NewSync("TEST", false, "ABA11")
+	logger := NewSync("TEST", false)
 	logger.SetInfoStyle(StyleFgGreen)
 
 	output := CaptureLogOutput(func() {
@@ -40,7 +40,7 @@ func TestLoggerSync_Infof_Color(t *testing.T) {
 }
 
 func TestLoggerSync_Warn_Color(t *testing.T) {
-	logger := NewSync("TEST", false, "ABA11")
+	logger := NewSync("TEST", false)
 	logger.SetWarnStyle(StyleFgYellow)
 
 	output := CaptureLogOutput(func() {
@@ -53,7 +53,7 @@ func TestLoggerSync_Warn_Color(t *testing.T) {
 }
 
 func TestLoggerSync_Warnf_Color(t *testing.T) {
-	logger := NewSync("TEST", false, "ABA11")
+	logger := NewSync("TEST", false)
 	logger.SetWarnStyle(StyleFgYellow)
 
 	output := CaptureLogOutput(func() {
@@ -70,7 +70,7 @@ func TestLoggerSync_Warnf_Color(t *testing.T) {
 }
 
 func TestLoggerSync_Error_Color(t *testing.T) {
-	logger := NewSync("TEST", false, "ABA11")
+	logger := NewSync("TEST", false)
 	logger.SetErrorStyle(StyleFgRed)
 
 	output := CaptureLogOutput(func() {
@@ -83,7 +83,7 @@ func TestLoggerSync_Error_Color(t *testing.T) {
 }
 
 func TestLoggerSync_Errorf_Color(t *testing.T) {
-	logger := NewSync("TEST", false, "ABA11")
+	logger := NewSync("TEST", false)
 	logger.SetErrorStyle(StyleFgRed)
 
 	output := CaptureLogOutput(func() {
@@ -100,7 +100,7 @@ func TestLoggerSync_Errorf_Color(t *testing.T) {
 }
 
 func TestLoggerSync_Debug_Color(t *testing.T) {
-	logger := NewSync("TEST", true, "ABA11") // Debug mode enabled
+	logger := NewSync("TEST", true) // Debug mode enabled
 	logger.SetDebugStyle(StyleFgCyan)
 
 	output := CaptureLogOutput(func() {
@@ -117,7 +117,7 @@ func TestLoggerSync_Debug_Color(t *testing.T) {
 }
 
 func TestLoggerSync_Debugf_Color(t *testing.T) {
-	logger := NewSync("TEST", true, "ABA11") // Debug mode enabled
+	logger := NewSync("TEST", true) // Debug mode enabled
 	logger.SetDebugStyle(StyleFgCyan)
 
 	output := CaptureLogOutput(func() {
