@@ -1,6 +1,7 @@
 package logger
 
 import (
+	"errors"
 	"fmt"
 	"log"
 	"os"
@@ -18,7 +19,7 @@ type LoggerSync struct {
 	panicStyle      []int8
 	fatalStyle      []int8
 	writeFileEnable bool
-	gateName        string
+	objectName      string
 	file            *os.File
 	fileName        string
 	path            string
@@ -33,34 +34,30 @@ type LoggerSync struct {
 // logger.SetDefaultStyle()
 // logger.Info("GPIO handler started")
 // log format: [INFO] [TIME] [GPIO]: GPIO handler started
-func NewSync(tag string, debugMode bool, gateName string) *LoggerSync {
+
+func NewSync(tag string, debugMode bool) *LoggerSync {
 	lenTag := len(tag)
 	if lenTag < 7 {
 		tag += strings.Repeat(" ", 7-lenTag)
 	}
 	tag = "[" + tag + "]"
 
-	// Initial file object
-	pathInit := newFolderPath("log_files")
-	fileNameInit := fileNameGenerator(gateName)
-	fileInit := createAndAppendObject(fileNameInit, pathInit)
-
 	// Create a new LoggerSync instance
 	logger := &LoggerSync{
 		tag:             tag,
 		enDebug:         debugMode,
 		writeFileEnable: false,
-		gateName:        gateName,
-		fileName:        fileNameInit,
-		file:            fileInit,
-		path:            pathInit,
 	}
 	log.SetOutput(os.Stdout)
 	log.SetFlags(0) // Disable the default timestamp and log prefix
+
 	return logger
 }
 
-func (l *LoggerSync) ChangeFileRoutine(hour int, minute int) {
+func (l *LoggerSync) ChangeFileRoutine(hour int, minute int) error {
+	if !l.writeFileEnable {
+		return errors.New("set write files enable first")
+	}
 	HOUR := hour
 	MINUTE := minute
 	go func() {
@@ -71,12 +68,12 @@ func (l *LoggerSync) ChangeFileRoutine(hour int, minute int) {
 				l.file.Close()
 
 				// Create new file object with the append mode
-				l.fileName = fileNameGenerator(l.gateName)
+				l.fileName = fileNameGenerator(l.objectName)
 				l.file = createAndAppendObject(l.fileName, l.path)
 			}
 		}
 	}()
-
+	return nil
 }
 
 func (l *LoggerSync) writeLog(msg string) {
@@ -85,20 +82,13 @@ func (l *LoggerSync) writeLog(msg string) {
 	}
 }
 
-func (l *LoggerSync) SetWriteFilesEnable(enable bool) {
-	l.writeFileEnable = enable
-}
-
-func (l *LoggerSync) SetPath(path string) {
-	l.file.Close()
-
-	// New path with folder creation
-	l.path = path
-	newFolderPath(path)
-
+func (l *LoggerSync) SetWriteFilesEnable(path string, objectName string) {
 	// Initial file object
-	l.fileName = fileNameGenerator(l.gateName)
-	l.file = createAndAppendObject(l.fileName, l.path)
+	l.objectName = objectName
+	l.path = newFolderPath(path)
+	l.fileName = fileNameGenerator(l.objectName)
+	l.file = createAndAppendObject(l.fileName, path)
+	l.writeFileEnable = true
 }
 
 func (l *LoggerSync) applyStyle(str string, styles ...int8) string {

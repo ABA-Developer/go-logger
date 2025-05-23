@@ -7,14 +7,13 @@ import (
 )
 
 func main() {
-	// SyncImplementation()
+	SyncImplementation()
 	AsyncImplementation()
 }
 
 func SyncImplementation() {
-	logger := logger.NewSync("TEST", true, "ABA11")
-	// logger.SetPath("log_files_test")
-	logger.SetWriteFilesEnable(true)
+	logger := logger.NewSync("TEST", true)
+	logger.SetWriteFilesEnable("log_files", "ABA11")
 	logger.ChangeFileRoutine(00, 00)
 	logger.SetDefaultStyle()
 	logger.Debug("Sync logger started")
@@ -30,7 +29,7 @@ func SyncImplementation() {
 		}
 		i++
 		time.Sleep(100 * time.Millisecond)
-		if i > 1000 {
+		if i > 200 {
 			break
 		}
 	}
@@ -38,9 +37,8 @@ func SyncImplementation() {
 }
 
 func AsyncImplementation() {
-	logger := logger.NewAsync("TEST", 10, true, "ABA11")
-	// logger.SetPath("log_files_test")
-	logger.SetWriteFilesEnable(true)
+	logger := logger.NewAsync("TEST", 10, true)
+	logger.SetWriteFilesEnable("log_files", "ABA11")
 	logger.ChangeFileRoutine(00, 00)
 	logger.SetDefaultStyle()
 	logger.Debug("Async logger started")
@@ -56,7 +54,7 @@ func AsyncImplementation() {
 		}
 		i++
 		time.Sleep(100 * time.Millisecond)
-		if i > 1000 {
+		if i > 200 {
 			break
 		}
 	}
